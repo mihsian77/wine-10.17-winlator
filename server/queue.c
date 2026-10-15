@@ -171,10 +171,10 @@ static const struct object_ops msg_queue_ops =
     NULL,                      /* add_queue */
     NULL,                      /* remove_queue */
     NULL,                      /* signaled */
+    msg_queue_get_esync_fd,    /* get_esync_fd */
     NULL,                      /* satisfied */
     no_signal,                 /* signal */
     no_get_fd,                 /* get_fd */
-    msg_queue_get_esync_fd,    /* get_esync_fd */
     msg_queue_get_sync,        /* get_sync */
     default_map_access,        /* map_access */
     default_get_sd,            /* get_sd */

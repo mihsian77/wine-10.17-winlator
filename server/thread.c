@@ -107,9 +107,9 @@ static const struct object_ops thread_apc_ops =
     &no_type,                   /* type */
     dump_thread_apc,            /* dump */
     NULL,                       /* add_queue */
-    NULL,                       /* get_esync_fd */
     NULL,                       /* remove_queue */
     NULL,                       /* signaled */
+    NULL,                       /* get_esync_fd */
     NULL,                       /* satisfied */
     no_signal,                  /* signal */
     no_get_fd,                  /* get_fd */
@@ -150,12 +150,12 @@ static void context_destroy( struct object *obj );
 static const struct object_ops context_ops =
 {
     sizeof(struct context),     /* size */
-    NULL,                       /* get_esync_fd */
     &no_type,                   /* type */
     dump_context,               /* dump */
     NULL,                       /* add_queue */
     NULL,                       /* remove_queue */
     NULL,                       /* signaled */
+    NULL,                       /* get_esync_fd */
     NULL,                       /* satisfied */
     no_signal,                  /* signal */
     no_get_fd,                  /* get_fd */
@@ -201,13 +201,13 @@ static void destroy_thread( struct object *obj );
 
 static const struct object_ops thread_ops =
 {
-    thread_get_esync_fd,        /* get_esync_fd */
     sizeof(struct thread),      /* size */
     &thread_type,               /* type */
     dump_thread,                /* dump */
     NULL,                       /* add_queue */
     NULL,                       /* remove_queue */
     NULL,                       /* signaled */
+    thread_get_esync_fd,        /* get_esync_fd */
     NULL,                       /* satisfied */
     no_signal,                  /* signal */
     no_get_fd,                  /* get_fd */
@@ -224,6 +224,13 @@ static const struct object_ops thread_ops =
     no_close_handle,            /* close_handle */
     destroy_thread              /* destroy */
 };
+
+static int thread_get_esync_fd( struct object *obj, enum esync_type *type )
+{
+    struct thread *thread = (struct thread *)obj;
+    *type = ESYNC_MANUAL_SERVER;
+    return thread->esync_fd;
+}
 
 static const struct fd_ops thread_fd_ops =
 {

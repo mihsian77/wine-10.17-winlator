@@ -168,8 +168,8 @@ static const struct object_ops pipe_server_ops =
     pipe_server_dump,             /* dump */
     NULL,                         /* add_queue */
     NULL,                         /* remove_queue */
-    default_fd_get_esync_fd,      /* get_esync_fd */
     NULL,                         /* signaled */
+    default_fd_get_esync_fd,      /* get_esync_fd */
     NULL,                         /* satisfied */
     no_signal,                    /* signal */
     pipe_end_get_fd,              /* get_fd */
@@ -213,9 +213,9 @@ static const struct object_ops pipe_client_ops =
     &file_type,                   /* type */
     pipe_client_dump,             /* dump */
     NULL,                         /* add_queue */
-    default_fd_get_esync_fd,      /* get_esync_fd */
     NULL,                         /* remove_queue */
     NULL,                         /* signaled */
+    default_fd_get_esync_fd,      /* get_esync_fd */
     NULL,                         /* satisfied */
     no_signal,                    /* signal */
     pipe_end_get_fd,              /* get_fd */
@@ -297,8 +297,8 @@ static const struct object_ops named_pipe_device_file_ops =
     named_pipe_device_file_dump,             /* dump */
     NULL,                                    /* add_queue */
     NULL,                                    /* remove_queue */
-    NULL,                                    /* get_esync_fd */
     NULL,                                    /* signaled */
+    NULL,                                    /* get_esync_fd */
     NULL,                                    /* satisfied */
     no_signal,                               /* signal */
     named_pipe_device_file_get_fd,           /* get_fd */
@@ -348,9 +348,9 @@ static const struct object_ops named_pipe_dir_ops =
     &file_type,                              /* type */
     named_pipe_dir_dump,                     /* dump */
     NULL,                                    /* add_queue */
-    NULL,                                    /* get_esync_fd */
     NULL,                                    /* remove_queue */
     NULL,                                    /* signaled */
+    NULL,                                    /* get_esync_fd */
     NULL,                                    /* satisfied */
     no_signal,                               /* signal */
     named_pipe_dir_get_fd,                   /* get_fd */

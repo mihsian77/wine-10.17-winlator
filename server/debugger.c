@@ -86,9 +86,9 @@ static const struct object_ops debug_event_ops =
     &no_type,                      /* type */
     debug_event_dump,              /* dump */
     NULL,                          /* add_queue */
-    NULL,                          /* get_esync_fd */
     NULL,                          /* remove_queue */
     NULL,                          /* signaled */
+    NULL,                          /* get_esync_fd */
     NULL,                          /* satisfied */
     no_signal,                     /* signal */
     no_get_fd,                     /* get_fd */
@@ -115,10 +115,10 @@ static const struct object_ops debug_obj_ops =
     sizeof(struct debug_obj),      /* size */
     &debug_obj_type,               /* type */
     debug_obj_dump,                /* dump */
-    NULL,                          /* get_esync_fd */
     NULL,                          /* add_queue */
     NULL,                          /* remove_queue */
     NULL,                          /* signaled */
+    NULL,                          /* get_esync_fd */
     NULL,                          /* satisfied */
     no_signal,                     /* signal */
     no_get_fd,                     /* get_fd */

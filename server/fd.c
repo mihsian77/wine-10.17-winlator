@@ -300,12 +300,12 @@ static void file_lock_destroy( struct object *obj );
 static const struct object_ops file_lock_ops =
 {
     sizeof(struct file_lock),   /* size */
-    NULL,                     /* get_esync_fd */
     &no_type,                   /* type */
     file_lock_dump,             /* dump */
     NULL,                       /* add_queue */
     NULL,                       /* remove_queue */
     NULL,                       /* signaled */
+    NULL,                     /* get_esync_fd */
     NULL,                       /* satisfied */
     no_signal,                  /* signal */
     no_get_fd,                  /* get_fd */
@@ -343,7 +343,6 @@ static file_pos_t max_unix_offset = OFF_T_MAX;
 
 struct timeout_user
 {
-    NULL,                       /* get_esync_fd */
     struct list           entry;      /* entry in sorted timeout list */
     abstime_t             when;       /* timeout expiry */
     timeout_callback      callback;   /* callback function */

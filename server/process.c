@@ -160,9 +160,9 @@ static const struct object_ops startup_info_ops =
     &no_type,                      /* type */
     startup_info_dump,             /* dump */
     NULL,                          /* add_queue */
-    NULL,                          /* get_esync_fd */
     NULL,                          /* remove_queue */
     NULL,                          /* signaled */
+    NULL,                          /* get_esync_fd */
     NULL,                          /* satisfied */
     no_signal,                     /* signal */
     no_get_fd,                     /* get_fd */
@@ -222,10 +222,10 @@ static const struct object_ops job_ops =
     sizeof(struct job),            /* size */
     &job_type,                     /* type */
     job_dump,                      /* dump */
-    NULL,                          /* get_esync_fd */
     NULL,                          /* add_queue */
     NULL,                          /* remove_queue */
     NULL,                          /* signaled */
+    NULL,                          /* get_esync_fd */
     NULL,                          /* satisfied */
     no_signal,                     /* signal */
     no_get_fd,                     /* get_fd */

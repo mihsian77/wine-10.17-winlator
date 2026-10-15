@@ -84,8 +84,8 @@ static const struct object_ops console_ops =
     NULL,                             /* add_queue */
     NULL,                             /* remove_queue */
     NULL,                             /* signaled */
-    NULL,                             /* satisfied */
     NULL,                             /* get_esync_fd */
+    NULL,                             /* satisfied */
     no_signal,                        /* signal */
     console_get_fd,                   /* get_fd */
     console_get_sync,                 /* get_sync */
@@ -165,8 +165,8 @@ static const struct object_ops console_server_ops =
     console_server_dump,              /* dump */
     NULL,                             /* add_queue */
     NULL,                             /* remove_queue */
-    console_server_get_esync_fd,      /* get_esync_fd */
     NULL,                             /* signaled */
+    console_server_get_esync_fd,      /* get_esync_fd */
     NULL,                             /* satisfied */
     no_signal,                        /* signal */
     console_server_get_fd,            /* get_fd */
@@ -235,10 +235,10 @@ static const struct object_ops screen_buffer_ops =
     sizeof(struct screen_buffer),     /* size */
     &file_type,                       /* type */
     screen_buffer_dump,               /* dump */
-    NULL,                             /* get_esync_fd */
     NULL,                             /* add_queue */
     NULL,                             /* remove_queue */
     NULL,                             /* signaled */
+    NULL,                             /* get_esync_fd */
     NULL,                             /* satisfied */
     no_signal,                        /* signal */
     screen_buffer_get_fd,             /* get_fd */
@@ -329,9 +329,9 @@ static const struct object_ops console_input_ops =
     &device_type,                     /* type */
     console_input_dump,               /* dump */
     NULL,                             /* add_queue */
-    NULL,                             /* get_esync_fd */
     NULL,                             /* remove_queue */
     NULL,                             /* signaled */
+    NULL,                             /* get_esync_fd */
     NULL,                             /* satisfied */
     no_signal,                        /* signal */
     console_input_get_fd,             /* get_fd */
@@ -389,11 +389,11 @@ static const struct object_ops console_output_ops =
 {
     sizeof(struct console_output),    /* size */
     &device_type,                     /* type */
-    NULL,                             /* get_esync_fd */
     console_output_dump,              /* dump */
     NULL,                             /* add_queue */
     NULL,                             /* remove_queue */
     NULL,                             /* signaled */
+    NULL,                             /* get_esync_fd */
     NULL,                             /* satisfied */
     no_signal,                        /* signal */
     console_output_get_fd,            /* get_fd */

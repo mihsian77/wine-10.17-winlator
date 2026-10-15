@@ -243,8 +243,8 @@ static const struct object_ops mailslot_device_file_ops =
     mailslot_device_file_dump,              /* dump */
     NULL,                                   /* add_queue */
     NULL,                                   /* remove_queue */
-    NULL,                                   /* get_esync_fd */
     NULL,                                   /* signaled */
+    NULL,                                   /* get_esync_fd */
     NULL,                                   /* satisfied */
     no_signal,                              /* signal */
     mailslot_device_file_get_fd,            /* get_fd */

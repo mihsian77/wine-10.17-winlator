@@ -167,8 +167,8 @@ static const struct object_ops completion_ops =
     completion_dump,           /* dump */
     NULL,                      /* add_queue */
     NULL,                      /* remove_queue */
-    NULL,                      /* get_esync_fd */
     NULL,                      /* signaled */
+    NULL,                      /* get_esync_fd */
     NULL,                      /* satisfied */
     no_signal,                 /* signal */
     no_get_fd,                 /* get_fd */
