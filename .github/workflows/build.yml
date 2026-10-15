@@ -1,0 +1,96 @@
+name: Build Wine 10.17 Chinese Localized
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+    paths:
+      - 'build.sh'
+      - 'patch_prefix.sh'
+      - 'po/zh_CN.po'
+      - '.github/workflows/build.yml'
+
+env:
+  WINEVER: "10.17"
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 360
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Free disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc
+          sudo apt-get clean
+          df -h /
+
+      - name: Install build dependencies (incl. gettext NLS)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential bison flex pkg-config \
+            gcc-mingw-w64-i686 g++-mingw-w64-i686 \
+            gcc-mingw-w64-x86-64 g++-mingw-w64-x86-64 mingw-w64 \
+            gettext zstd xz-utils \
+            libfreetype-dev libfontconfig1-dev libgl1-mesa-dev libglu1-mesa-dev \
+            libvulkan-dev libsdl2-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev \
+            libgstreamer-plugins-good1.0-dev libgstreamer-plugins-bad1.0-dev \
+            libunwind-dev libasound2-dev libpulse-dev libgnutls28-dev libmpg123-dev \
+            libopenal-dev libpng-dev libjpeg-dev libtiff-dev libwebp-dev liblcms2-dev \
+            libxml2-dev libxslt1-dev libx11-dev libxcursor-dev libxi-dev \
+            libxrandr-dev libxrender-dev libkrb5-dev libgssapi-krb5-2 krb5-config
+          msgfmt --version | head -1
+
+      - name: Download Noto Sans CJK SC fonts
+        run: |
+          mkdir -p fonts
+          cd fonts
+          curl -sL -o noto-sc.zip "https://github.com/notofonts/noto-cjk/releases/download/Sans2.004/08_NotoSansCJKsc.zip"
+          if [ -f noto-sc.zip ] && unzip -l noto-sc.zip >/dev/null 2>&1; then
+            unzip -o noto-sc.zip "*.otf" 2>/dev/null || unzip -o noto-sc.zip
+            rm -f noto-sc.zip
+          else
+            echo "WARNING: Noto CJK download failed"
+            rm -f noto-sc.zip
+          fi
+          cd ..
+          ls -lh fonts/ || true
+
+      - name: Verify gettext NLS enabled
+        run: |
+          if grep -qE '^[[:space:]]*--without-gettext' build.sh; then
+            echo "ERROR: --without-gettext still active!"
+            exit 1
+          fi
+          echo "OK: gettext NLS enabled"
+          grep -n 'WINEVER=' build.sh | head -1
+
+      - name: Build Wine (WOW64, NLS multi-language)
+        env:
+          FONT_DIR: ${{ github.workspace }}/fonts
+        run: |
+          chmod +x build.sh patch_prefix.sh
+          bash build.sh --clean
+
+      - name: Verify output packages
+        run: |
+          echo "=== dist directory ==="
+          ls -lh dist/
+          for f in dist/*.wcp.xz dist/*.whp; do
+            [ -f "$f" ] || continue
+            echo "=== $f ==="
+            echo "  size: $(du -h "$f" | cut -f1)"
+            echo "  magic: $(xxd -l 6 -p "$f")"
+            tar -tJf "$f" 2>/dev/null | grep -E 'profile.json|prefixPack' | head -3
+          done
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: Wine-10.17-x86_64-zh-packages
+          path: dist/
+          retention-days: 30

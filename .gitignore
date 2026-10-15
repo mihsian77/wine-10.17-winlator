@@ -1,0 +1,5 @@
+autom4te.cache/
+configure~
+include/config.h.in~
+*.rej
+*.orig
