@@ -4069,13 +4069,6 @@ NTSTATUS WINAPI wow64_NtUserRegisterWindowMessage( UINT *args )
     return NtUserRegisterWindowMessage( unicode_str_32to64( &name, name32 ));
 }
 
-NTSTATUS WINAPI wow64_NtUserRegisterWindowMessage( UINT *args )
-{
-    UNICODE_STRING *name = get_ptr( &args );
-
-    return NtUserRegisterWindowMessage( name );
-}
-
 NTSTATUS WINAPI wow64_NtUserRemoveMenu( UINT *args )
 {
     HMENU handle = get_handle( &args );
