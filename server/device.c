@@ -100,6 +100,7 @@ struct device_manager
 
 static void device_manager_dump( struct object *obj, int verbose );
 static struct object *device_manager_get_sync( struct object *obj );
+static int device_manager_get_esync_fd( struct object *obj, enum esync_type *type );
 static void device_manager_destroy( struct object *obj );
 
 static const struct object_ops device_manager_ops =

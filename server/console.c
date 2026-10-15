@@ -145,10 +145,12 @@ struct console_server
     unsigned int          once_input : 1; /* flag if input thread has already been requested */
     int                   term_fd;        /* UNIX terminal fd */
     struct termios        termios;        /* original termios */
+    int                   esync_fd;       /* esync fd for console server */
 };
 
 static void console_server_dump( struct object *obj, int verbose );
 static void console_server_destroy( struct object *obj );
+static int console_server_get_esync_fd( struct object *obj, enum esync_type *type );
 static struct fd *console_server_get_fd( struct object *obj );
 static struct object *console_server_get_sync( struct object *obj );
 static struct object *console_server_lookup_name( struct object *obj, struct unicode_str *name,

@@ -62,6 +62,7 @@ static void event_sync_dump( struct object *obj, int verbose );
 static int event_sync_signaled( struct object *obj, struct wait_queue_entry *entry );
 static void event_sync_satisfied( struct object *obj, struct wait_queue_entry *entry );
 static int event_sync_signal( struct object *obj, unsigned int access, int signal );
+static int event_get_esync_fd( struct object *obj, enum esync_type *type );
 
 static const struct object_ops event_sync_ops =
 {

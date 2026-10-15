@@ -67,6 +67,7 @@ struct timer
 
 static void timer_dump( struct object *obj, int verbose );
 static struct object *timer_get_sync( struct object *obj );
+static int timer_get_esync_fd( struct object *obj, enum esync_type *type );
 static void timer_destroy( struct object *obj );
 
 static const struct object_ops timer_ops =
