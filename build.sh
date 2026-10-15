@@ -175,20 +175,30 @@ fi
 
 # ==============================================================================
 # Customize prefixPack (中文环境)
+# 若 prefixPack.tzst 为空/无效（占位），生成合法空 .wine tar 供 wcp 占位，
+# wine 首次运行时会自动初始化 prefix；whp 打包不依赖此文件
 # ==============================================================================
 echo "==> Customizing prefixPack..."
 PREFIX_TAR="${BUILD_DIR}/prefix-custom.tar"
-if [ -x "${WINE_SRC_DIR}/patch_prefix.sh" ]; then
-  PATCH_ARGS=("${WINE_SRC_DIR}/prefixPack.tzst" "${PREFIX_TAR}")
-  [ -n "${FONT_DIR:-}" ] && PATCH_ARGS+=("${FONT_DIR}")
-  bash "${WINE_SRC_DIR}/patch_prefix.sh" "${PATCH_ARGS[@]}"
-else
-  echo "WARNING: patch_prefix.sh not found, using original"
-  if file "${WINE_SRC_DIR}/prefixPack.tzst" | grep -qi zstd; then
-    zstd -d "${WINE_SRC_DIR}/prefixPack.tzst" -o "${PREFIX_TAR}" --force
+if [ -s "${WINE_SRC_DIR}/prefixPack.tzst" ] && file "${WINE_SRC_DIR}/prefixPack.tzst" | grep -qiE 'zstd|xz|tar archive'; then
+  if [ -x "${WINE_SRC_DIR}/patch_prefix.sh" ]; then
+    PATCH_ARGS=("${WINE_SRC_DIR}/prefixPack.tzst" "${PREFIX_TAR}")
+    [ -n "${FONT_DIR:-}" ] && PATCH_ARGS+=("${FONT_DIR}")
+    bash "${WINE_SRC_DIR}/patch_prefix.sh" "${PATCH_ARGS[@]}"
   else
-    cp "${WINE_SRC_DIR}/prefixPack.tzst" "${PREFIX_TAR}"
+    echo "WARNING: patch_prefix.sh not found, using original"
+    if file "${WINE_SRC_DIR}/prefixPack.tzst" | grep -qi zstd; then
+      zstd -d "${WINE_SRC_DIR}/prefixPack.tzst" -o "${PREFIX_TAR}" --force
+    else
+      cp "${WINE_SRC_DIR}/prefixPack.tzst" "${PREFIX_TAR}"
+    fi
   fi
+else
+  echo "WARNING: prefixPack.tzst 无效（空/占位），生成空 .wine prefix 占位（wine 首次运行自动初始化）"
+  EMPTY_PREFIX="${BUILD_DIR}/empty-prefix"
+  rm -rf "${EMPTY_PREFIX}"
+  mkdir -p "${EMPTY_PREFIX}/.wine"
+  tar -cf "${PREFIX_TAR}" -C "${EMPTY_PREFIX}" .wine
 fi
 
 # ==============================================================================
