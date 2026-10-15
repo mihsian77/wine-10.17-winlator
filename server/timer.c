@@ -63,6 +63,7 @@ struct timer
     struct thread       *thread;    /* thread that set the APC function */
     client_ptr_t         callback;  /* callback APC function */
     client_ptr_t         arg;       /* callback argument */
+    int                  esync_fd;  /* esync file descriptor */
 };
 
 static void timer_dump( struct object *obj, int verbose );
