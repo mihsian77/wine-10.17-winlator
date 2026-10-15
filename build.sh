@@ -62,10 +62,14 @@ cd "${BUILD_DIR}"
 # GstBufferMapInfo 是 GStreamer 1.24+ 对 GstMapInfo 的别名，功能完全一致
 # ==============================================================================
 echo "==> 应用 GStreamer 1.20 兼容性补丁..."
-grep -rl "GstBufferMapInfo" "${WINE_SRC_DIR}/dlls/winegstreamer/" 2>/dev/null | while read f; do
-  sed -i 's/GstBufferMapInfo/GstMapInfo/g' "$f"
-  echo "  已修复: $(realpath --relative-to="${WINE_SRC_DIR}" "$f")"
-done
+if grep -rl "GstBufferMapInfo" "${WINE_SRC_DIR}/dlls/winegstreamer/" 2>/dev/null; then
+  grep -rl "GstBufferMapInfo" "${WINE_SRC_DIR}/dlls/winegstreamer/" 2>/dev/null | while read f; do
+    sed -i 's/GstBufferMapInfo/GstMapInfo/g' "$f"
+    echo "  已修复: $(realpath --relative-to="${WINE_SRC_DIR}" "$f")"
+  done
+else
+  echo "  (wine 10.17 上游已使用 GstMapInfo，无需兼容补丁)"
+fi
 
 if [ ! -f "Makefile" ]; then
   echo "==> [阶段0] Running Wine ./configure (NLS enabled)..."
