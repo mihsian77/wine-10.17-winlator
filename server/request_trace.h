@@ -3361,54 +3361,6 @@ static void dump_get_next_thread_reply( const struct get_next_thread_reply *req 
     fprintf( stderr, " handle=%04x", req->handle );
 }
 
-static void dump_create_esync_request( const struct create_esync_request *req )
-{
-    fprintf( stderr, " access=%08x", req->access );
-    fprintf( stderr, ", initval=%d", req->initval );
-    fprintf( stderr, ", type=%d", req->type );
-    fprintf( stderr, ", max=%d", req->max );
-    dump_varargs_object_attributes( ", objattr=", cur_size );
-}
-
-static void dump_create_esync_reply( const struct create_esync_reply *req )
-{
-    fprintf( stderr, " handle=%04x", req->handle );
-    fprintf( stderr, ", type=%d", req->type );
-    fprintf( stderr, ", shm_idx=%08x", req->shm_idx );
-}
-
-static void dump_open_esync_request( const struct open_esync_request *req )
-{
-    fprintf( stderr, " access=%08x", req->access );
-    fprintf( stderr, ", attributes=%08x", req->attributes );
-    fprintf( stderr, ", rootdir=%04x", req->rootdir );
-    fprintf( stderr, ", type=%d", req->type );
-    dump_varargs_unicode_str( ", name=", cur_size );
-}
-
-static void dump_open_esync_reply( const struct open_esync_reply *req )
-{
-    fprintf( stderr, " handle=%04x", req->handle );
-    fprintf( stderr, ", type=%d", req->type );
-    fprintf( stderr, ", shm_idx=%08x", req->shm_idx );
-}
-
-static void dump_get_esync_fd_request( const struct get_esync_fd_request *req )
-{
-    fprintf( stderr, " handle=%04x", req->handle );
-}
-
-static void dump_get_esync_fd_reply( const struct get_esync_fd_reply *req )
-{
-    fprintf( stderr, " type=%d", req->type );
-    fprintf( stderr, ", shm_idx=%08x", req->shm_idx );
-}
-
-static void dump_esync_msgwait_request( const struct esync_msgwait_request *req )
-{
-    fprintf( stderr, " in_msgwait=%d", req->in_msgwait );
-}
-
 static void dump_set_keyboard_repeat_request( const struct set_keyboard_repeat_request *req )
 {
     fprintf( stderr, " enable=%d", req->enable );
@@ -3514,10 +3466,6 @@ static void dump_d3dkmt_object_open_name_request( const struct d3dkmt_object_ope
 static void dump_d3dkmt_object_open_name_reply( const struct d3dkmt_object_open_name_reply *req )
 {
     fprintf( stderr, " handle=%04x", req->handle );
-}
-
-static void dump_get_esync_apc_fd_request( const struct get_esync_apc_fd_request *req )
-{
 }
 
 typedef void (*dump_func)( const void *req );
@@ -3819,10 +3767,6 @@ static const dump_func req_dumpers[REQ_NB_REQUESTS] =
     (dump_func)dump_resume_process_request,
     (dump_func)dump_get_next_process_request,
     (dump_func)dump_get_next_thread_request,
-    (dump_func)dump_create_esync_request,
-    (dump_func)dump_open_esync_request,
-    (dump_func)dump_get_esync_fd_request,
-    (dump_func)dump_esync_msgwait_request,
     (dump_func)dump_set_keyboard_repeat_request,
     (dump_func)dump_get_inproc_sync_fd_request,
     (dump_func)dump_get_inproc_alert_fd_request,
@@ -3832,7 +3776,6 @@ static const dump_func req_dumpers[REQ_NB_REQUESTS] =
     (dump_func)dump_d3dkmt_object_open_request,
     (dump_func)dump_d3dkmt_share_objects_request,
     (dump_func)dump_d3dkmt_object_open_name_request,
-    (dump_func)dump_get_esync_apc_fd_request,
 };
 
 static const dump_func reply_dumpers[REQ_NB_REQUESTS] =
@@ -4132,10 +4075,6 @@ static const dump_func reply_dumpers[REQ_NB_REQUESTS] =
     NULL,
     (dump_func)dump_get_next_process_reply,
     (dump_func)dump_get_next_thread_reply,
-    (dump_func)dump_create_esync_reply,
-    (dump_func)dump_open_esync_reply,
-    (dump_func)dump_get_esync_fd_reply,
-    NULL,
     (dump_func)dump_set_keyboard_repeat_reply,
     (dump_func)dump_get_inproc_sync_fd_reply,
     (dump_func)dump_get_inproc_alert_fd_reply,
@@ -4145,7 +4084,6 @@ static const dump_func reply_dumpers[REQ_NB_REQUESTS] =
     (dump_func)dump_d3dkmt_object_open_reply,
     (dump_func)dump_d3dkmt_share_objects_reply,
     (dump_func)dump_d3dkmt_object_open_name_reply,
-    NULL,
 };
 
 static const char * const req_names[REQ_NB_REQUESTS] =
@@ -4445,10 +4383,6 @@ static const char * const req_names[REQ_NB_REQUESTS] =
     "resume_process",
     "get_next_process",
     "get_next_thread",
-    "create_esync",
-    "open_esync",
-    "get_esync_fd",
-    "esync_msgwait",
     "set_keyboard_repeat",
     "get_inproc_sync_fd",
     "get_inproc_alert_fd",
@@ -4458,7 +4392,6 @@ static const char * const req_names[REQ_NB_REQUESTS] =
     "d3dkmt_object_open",
     "d3dkmt_share_objects",
     "d3dkmt_object_open_name",
-    "get_esync_apc_fd",
 };
 
 static const struct

@@ -94,7 +94,6 @@ static const struct object_ops file_ops =
     NULL,                         /* add_queue */
     NULL,                         /* remove_queue */
     NULL,                         /* signaled */
-    NULL,                         /* get_esync_fd */
     NULL,                         /* satisfied */
     no_signal,                    /* signal */
     file_get_fd,                  /* get_fd */
@@ -296,7 +295,6 @@ static enum server_fd_type file_get_fd_type( struct fd *fd )
 {
     struct file *file = get_fd_user( fd );
 
-    if (S_ISLNK(file->mode)) return FD_TYPE_SYMLINK;
     if (S_ISREG(file->mode) || S_ISBLK(file->mode)) return FD_TYPE_FILE;
     if (S_ISDIR(file->mode)) return FD_TYPE_DIR;
     return FD_TYPE_CHAR;

@@ -90,7 +90,6 @@
 #include "winioctl.h"
 #include "winternl.h"
 #include "unix_private.h"
-#include "esync.h"
 #include "wine/list.h"
 #include "ntsyscalls.h"
 #include "wine/debug.h"
@@ -1908,7 +1907,6 @@ static void start_main_thread(void)
     signal_init_threading();
     dbg_init();
     startup_info_size = server_init_process();
-    esync_init();
     virtual_map_user_shared_data();
     init_cpu_info();
     init_files();
