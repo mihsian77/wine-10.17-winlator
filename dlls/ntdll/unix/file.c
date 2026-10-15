@@ -122,6 +122,9 @@
 #include "wine/server.h"
 #include "wine/list.h"
 #include "wine/debug.h"
+
+/* forward declaration (reparse point support) */
+static NTSTATUS nt_to_unix_file_name( const OBJECT_ATTRIBUTES *attr, char **name_ret, UINT disposition );
 #include "unix_private.h"
 #include "ddk/ntifs.h"
 
