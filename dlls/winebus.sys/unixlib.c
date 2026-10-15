@@ -319,9 +319,6 @@ const unixlib_entry_t __wine_unix_call_funcs[] =
     unix_device_set_output_report,
     unix_device_get_feature_report,
     unix_device_set_feature_report,
-    winlator_bus_init,
-    winlator_bus_wait,
-    winlator_bus_stop,
 };
 
 C_ASSERT(ARRAYSIZE(__wine_unix_call_funcs) == unix_funcs_count);

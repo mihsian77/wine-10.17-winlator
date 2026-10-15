@@ -36,6 +36,7 @@
 #include <dlfcn.h>
 #include <X11/cursorfont.h>
 #include <X11/Xlib.h>
+#include <X11/XKBlib.h>
 #ifdef HAVE_X11_EXTENSIONS_XRENDER_H
 #include <X11/extensions/Xrender.h>
 #endif
@@ -64,8 +65,8 @@ Atom systray_atom = 0;
 HWND systray_hwnd = 0;
 unsigned int screen_bpp;
 Window root_window;
-BOOL usexvidmode = FALSE;
-BOOL usexrandr = FALSE;
+BOOL usexvidmode = TRUE;
+BOOL usexrandr = TRUE;
 BOOL usexcomposite = TRUE;
 BOOL use_egl = TRUE;
 BOOL use_take_focus = TRUE;
@@ -189,11 +190,7 @@ static const char * const atom_names[NB_XATOMS - FIRST_XATOM] =
     "text/plain",
     "text/rtf",
     "text/richtext",
-    "text/uri-list",
-    "_NET_WM_HWND",
-    "_NET_WM_WOW64",
-    "_NET_WM_SURFACE",
-    "_NET_WM_GPU_INFO"
+    "text/uri-list"
 };
 
 /***********************************************************************
@@ -674,6 +671,7 @@ static NTSTATUS x11drv_init( void *arg )
 #endif
     x11drv_xinput2_load();
 
+    XkbUseExtension( gdi_display, NULL, NULL );
     X11DRV_InitKeyboard( gdi_display );
     if (use_xim) use_xim = xim_init( input_style );
 
@@ -752,6 +750,8 @@ struct x11drv_thread_data *x11drv_init_thread_data(void)
 
     fcntl( ConnectionNumber(data->display), F_SETFD, 1 ); /* set close on exec flag */
 
+    XkbUseExtension( data->display, NULL, NULL );
+    XkbSetDetectableAutoRepeat( data->display, True, NULL );
     if (TRACE_ON(synchronous)) XSynchronize( data->display, True );
 
     set_queue_display_fd( data->display );

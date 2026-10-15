@@ -153,9 +153,6 @@ enum unix_funcs
     device_set_output_report,
     device_get_feature_report,
     device_set_feature_report,
-    winlator_init,
-    winlator_wait,
-    winlator_stop,
     unix_funcs_count,
 };
 

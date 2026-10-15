@@ -234,10 +234,6 @@ extern NTSTATUS iohid_bus_init(void *);
 extern NTSTATUS iohid_bus_wait(void *);
 extern NTSTATUS iohid_bus_stop(void *);
 
-extern NTSTATUS winlator_bus_init(void *);
-extern NTSTATUS winlator_bus_wait(void *);
-extern NTSTATUS winlator_bus_stop(void *);
-
 extern void bus_event_cleanup(struct bus_event *event);
 extern void bus_event_queue_destroy(struct list *queue);
 extern BOOL bus_event_queue_device_removed(struct list *queue, struct unix_device *device);

@@ -184,7 +184,6 @@ static const char *glxExtensions;
 static char wglExtensions[4096];
 static int glxVersion[2];
 static int glx_opcode;
-static char *cached_gpu_info = NULL;
 
 struct glx_pixel_format
 {
@@ -401,18 +400,7 @@ static BOOL X11DRV_WineGL_InitOpenglInfo(void)
     }
     gl_renderer = (const char *)pglGetString(GL_RENDERER);
     gl_version  = (const char *)pglGetString(GL_VERSION);
-    glExtensions = (const char *)pglGetString(GL_EXTENSIONS);
-
-    if (wnd_gpu_info)
-    {
-        if (cached_gpu_info)
-        {
-            free(cached_gpu_info);
-            cached_gpu_info = NULL;
-        }
-
-        if (gl_renderer) cached_gpu_info = strdup(gl_renderer);
-    }
+    glExtensions = (const char *) pglGetString(GL_EXTENSIONS);
 
     /* Get the common GLX version supported by GLX client and server ( major/minor) */
     pglXQueryVersion(gdi_display, &glxVersion[0], &glxVersion[1]);

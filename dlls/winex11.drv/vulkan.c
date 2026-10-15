@@ -50,8 +50,6 @@ static const struct vulkan_driver_funcs x11drv_vulkan_driver_funcs;
 static VkResult X11DRV_vulkan_surface_create( HWND hwnd, const struct vulkan_instance *instance, VkSurfaceKHR *handle,
                                               struct client_surface **client )
 {
-    char *gpu_info = NULL;
-
     VkXlibSurfaceCreateInfoKHR info =
     {
         .sType = VK_STRUCTURE_TYPE_XLIB_SURFACE_CREATE_INFO_KHR,

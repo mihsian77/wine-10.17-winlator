@@ -650,6 +650,77 @@ static void sync_window_text( Display *display, Window win, const WCHAR *text )
 
 
 /***********************************************************************
+ *              get_bitmap_argb
+ *
+ * Return the bitmap bits in ARGB format. Helper for setting icon hints.
+ */
+static unsigned long *get_bitmap_argb( HDC hdc, HBITMAP color, HBITMAP mask, unsigned int *size )
+{
+    char buffer[FIELD_OFFSET( BITMAPINFO, bmiColors[256] )];
+    BITMAPINFO *info = (BITMAPINFO *)buffer;
+    BITMAP bm;
+    unsigned long *bits = NULL;
+    unsigned int *ptr;
+    unsigned char *mask_bits = NULL;
+    int i, j;
+    BOOL has_alpha = FALSE;
+
+    if (!NtGdiExtGetObjectW( color, sizeof(bm), &bm )) return NULL;
+    info->bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+    info->bmiHeader.biWidth = bm.bmWidth;
+    info->bmiHeader.biHeight = -bm.bmHeight;
+    info->bmiHeader.biPlanes = 1;
+    info->bmiHeader.biBitCount = 32;
+    info->bmiHeader.biCompression = BI_RGB;
+    info->bmiHeader.biSizeImage = bm.bmWidth * bm.bmHeight * 4;
+    info->bmiHeader.biXPelsPerMeter = 0;
+    info->bmiHeader.biYPelsPerMeter = 0;
+    info->bmiHeader.biClrUsed = 0;
+    info->bmiHeader.biClrImportant = 0;
+    *size = bm.bmWidth * bm.bmHeight + 2;
+    if (!(bits = malloc( *size * sizeof(*bits) ))) goto failed;
+    ptr = (unsigned int *)bits;
+    if (!NtGdiGetDIBitsInternal( hdc, color, 0, bm.bmHeight, ptr + 2, info, DIB_RGB_COLORS, 0, 0 ))
+        goto failed;
+
+    ptr[0] = bm.bmWidth;
+    ptr[1] = bm.bmHeight;
+
+    for (i = 0; i < bm.bmWidth * bm.bmHeight; i++)
+        if ((has_alpha = (ptr[i + 2] & 0xff000000) != 0)) break;
+
+    if (!has_alpha)
+    {
+        unsigned int width_bytes = (bm.bmWidth + 31) / 32 * 4;
+        /* generate alpha channel from the mask */
+        info->bmiHeader.biBitCount = 1;
+        info->bmiHeader.biSizeImage = width_bytes * bm.bmHeight;
+        if (!(mask_bits = malloc( info->bmiHeader.biSizeImage ))) goto failed;
+        if (!NtGdiGetDIBitsInternal( hdc, mask, 0, bm.bmHeight, mask_bits, info, DIB_RGB_COLORS, 0, 0 ))
+            goto failed;
+        ptr = (unsigned int *)bits + 2;
+        for (i = 0; i < bm.bmHeight; i++)
+            for (j = 0; j < bm.bmWidth; j++, ptr++)
+                if (!((mask_bits[i * width_bytes + j / 8] << (j % 8)) & 0x80)) *ptr |= 0xff000000;
+        free( mask_bits );
+    }
+
+    /* convert to array of longs */
+    if (bits && sizeof(long) > sizeof(int))
+    {
+        ptr = (unsigned int *)bits;
+        for (i = *size - 1; i >= 0; i--) bits[i] = ptr[i];
+    }
+    return bits;
+
+failed:
+    free( bits );
+    free( mask_bits );
+    return NULL;
+}
+
+
+/***********************************************************************
  *              create_icon_pixmaps
  */
 static BOOL create_icon_pixmaps( HDC hdc, const ICONINFO *icon, Pixmap *icon_ret, Pixmap *mask_ret )
@@ -912,7 +983,6 @@ static void set_style_hints( struct x11drv_win_data *data, DWORD style, DWORD ex
     HWND owner = NtUserGetWindowRelative( data->hwnd, GW_OWNER );
     Window owner_win = 0;
     XWMHints *wm_hints;
-    int WindowLayeredHint = data->layered ? (1 << 16) : 0;
     Atom window_type;
 
     if (owner)
@@ -943,7 +1013,7 @@ static void set_style_hints( struct x11drv_win_data *data, DWORD style, DWORD ex
 
     if ((wm_hints = XAllocWMHints()))
     {
-        wm_hints->flags = InputHint | StateHint | WindowGroupHint | WindowLayeredHint;
+        wm_hints->flags = InputHint | StateHint | WindowGroupHint;
         wm_hints->input = !use_take_focus && !(style & WS_DISABLED);
         wm_hints->initial_state = (style & WS_MINIMIZE) ? IconicState : NormalState;
         wm_hints->window_group = group_leader;
@@ -959,6 +1029,22 @@ static void set_style_hints( struct x11drv_win_data *data, DWORD style, DWORD ex
         XSetWMHints( data->display, data->whole_window, wm_hints );
         XFree( wm_hints );
     }
+
+    if (data->icon_bits)
+    {
+        TRACE( "window %p/%lx requesting _NET_WM_ICON, serial %lu\n", data->hwnd,
+               data->whole_window, NextRequest( data->display ) );
+        XChangeProperty( data->display, data->whole_window, x11drv_atom(_NET_WM_ICON),
+                         XA_CARDINAL, 32, PropModeReplace,
+                         (unsigned char *)data->icon_bits, data->icon_size );
+    }
+    else
+    {
+        TRACE( "window %p/%lx deleting _NET_WM_ICON, serial %lu\n", data->hwnd,
+               data->whole_window, NextRequest( data->display ) );
+        XDeleteProperty( data->display, data->whole_window, x11drv_atom(_NET_WM_ICON) );
+    }
+
 }
 
 
@@ -967,15 +1053,12 @@ static void set_style_hints( struct x11drv_win_data *data, DWORD style, DWORD ex
  *
  * Set the window manager hints that don't change over the lifetime of a window.
  */
-static void set_initial_wm_hints( Display *display, Window window, HWND hwnd )
+static void set_initial_wm_hints( Display *display, Window window )
 {
     long i;
-    DWORD pid = 0;
     Atom protocols[3];
-    BOOL is_wow64 = FALSE;
     Atom dndVersion = WINE_XDND_VERSION;
     XClassHint *class_hints;
-    ULONG_PTR pbi;
 
     /* wm protocols */
     i = 0;
@@ -995,21 +1078,14 @@ static void set_initial_wm_hints( Display *display, Window window, HWND hwnd )
     }
 
     /* set the WM_CLIENT_MACHINE and WM_LOCALE_NAME properties */
-    XSetWMProperties( display, window, NULL, NULL, NULL, 0, NULL, NULL, NULL );
-
-    pid = GetCurrentProcessId();
-    XChangeProperty( display, window, x11drv_atom(_NET_WM_PID ),
-                    XA_CARDINAL, 32, PropModeReplace, (unsigned char *)&pid, 1);
-
-    if (!NtQueryInformationProcess( GetCurrentProcess(), ProcessWow64Information, &pbi, sizeof(pbi), NULL )) is_wow64 = !!pbi;
-    XChangeProperty( display, window, x11drv_atom(_NET_WM_WOW64),
-                     XA_CARDINAL, 8, PropModeReplace, (unsigned char *)&is_wow64, 1 );
+    XSetWMProperties(display, window, NULL, NULL, NULL, 0, NULL, NULL, NULL);
+    /* set the pid. together, these properties are needed so the window manager can kill us if we freeze */
+    i = getpid();
+    XChangeProperty(display, window, x11drv_atom(_NET_WM_PID),
+                    XA_CARDINAL, 32, PropModeReplace, (unsigned char *)&i, 1);
 
     XChangeProperty( display, window, x11drv_atom(XdndAware),
                      XA_ATOM, 32, PropModeReplace, (unsigned char*)&dndVersion, 1 );
-
-    XChangeProperty( display, window, x11drv_atom(_NET_WM_HWND),
-                     XA_CARDINAL, 32, PropModeReplace, (unsigned char *)&hwnd, 2 );
 }
 
 
@@ -1150,9 +1226,8 @@ static void update_net_wm_fullscreen_monitors( struct x11drv_win_data *data )
 static void window_set_net_wm_state( struct x11drv_win_data *data, UINT new_state )
 {
     UINT i, count, old_state = data->pending_state.net_wm_state;
-    struct x11drv_thread_data *thread_data = x11drv_thread_data();
 
-    if (thread_data) new_state &= thread_data->net_wm_state_mask;
+    new_state &= x11drv_thread_data()->net_wm_state_mask;
     data->desired_state.net_wm_state = new_state;
     if (!data->whole_window || !data->managed || data->embedded) return; /* no window or not managed, nothing to update */
     if (data->wm_state_serial) return; /* another WM_STATE update is pending, wait for it to complete */
@@ -2154,7 +2229,7 @@ void destroy_client_window( HWND hwnd, Window client_window )
 /**********************************************************************
  *		create_client_window
  */
-Window create_client_window( HWND hwnd, const XVisualInfo *visual, Colormap colormap, const char *gpu_info )
+Window create_client_window( HWND hwnd, const XVisualInfo *visual, Colormap colormap )
 {
     struct x11drv_win_data *data = get_win_data( hwnd );
     XSetWindowAttributes attr;
@@ -2195,16 +2270,6 @@ Window create_client_window( HWND hwnd, const XVisualInfo *visual, Colormap colo
                                                CWBackingStore | CWColormap | CWBorderPixel, &attr );
     if (data->client_window)
     {
-        const BOOL is_surface = TRUE;
-        XChangeProperty( gdi_display, data->client_window, x11drv_atom(_NET_WM_SURFACE),
-                         XA_CARDINAL, 8, PropModeReplace, (unsigned char *)&is_surface, 1 );
-
-        if (gpu_info)
-        {
-            XChangeProperty( gdi_display, data->client_window, x11drv_atom(_NET_WM_GPU_INFO),
-                             XA_CARDINAL, 8, PropModeReplace, (unsigned char *)gpu_info, strlen(gpu_info) );
-        }
-
         XMapWindow( gdi_display, data->client_window );
         if (data->whole_window)
         {
@@ -2264,7 +2329,7 @@ static void create_whole_window( struct x11drv_win_data *data )
     data->desired_state.rect = data->current_state.rect;
 
     x11drv_xinput2_enable( data->display, data->whole_window );
-    set_initial_wm_hints( data->display, data->whole_window, data->hwnd );
+    set_initial_wm_hints( data->display, data->whole_window );
     set_wm_hints( data );
 
     XSaveContext( data->display, data->whole_window, winContext, (char *)data->hwnd );
@@ -2434,6 +2499,7 @@ void X11DRV_DestroyWindow( HWND hwnd )
     if (data->icon_pixmap) XFreePixmap( gdi_display, data->icon_pixmap );
     if (data->icon_mask) XFreePixmap( gdi_display, data->icon_mask );
     if (data->parent) host_window_release( data->parent );
+    free( data->icon_bits );
     XDeleteContext( gdi_display, (XID)hwnd, win_data_context );
     release_win_data( data );
     free( data );
@@ -2470,7 +2536,7 @@ static BOOL create_desktop_win_data( Window win, HWND hwnd )
     data->whole_window = win;
     window_set_managed( data, TRUE );
     NtUserSetProp( data->hwnd, whole_window_prop, (HANDLE)win );
-    set_initial_wm_hints( display, win, data->hwnd );
+    set_initial_wm_hints( display, win );
     if (is_desktop_fullscreen()) window_set_net_wm_state( data, (1 << NET_WM_STATE_FULLSCREEN) );
     release_win_data( data );
     if (thread_data->clip_window) XReparentWindow( display, thread_data->clip_window, win, 0, 0 );

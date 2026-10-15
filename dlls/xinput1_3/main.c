@@ -101,7 +101,6 @@ static CRITICAL_SECTION_DEBUG controller_critsect_debug[XUSER_MAX_COUNT] =
     },
     {
         0, 0, &controllers[2].crit,
-static char xinput_min_index = 3;
         { &controller_critsect_debug[2].ProcessLocksList, &controller_critsect_debug[2].ProcessLocksList },
           0, 0, { (DWORD_PTR)(__FILE__ ": controllers[2].crit") }
     },
@@ -196,7 +195,6 @@ static void check_waveform_caps(struct xinput_controller *controller, HANDLE dev
     else if (waveform == HID_USAGE_HAPTICS_WAVEFORM_RUMBLE)
     {
         TRACE("Found rumble caps, report %u collection %u\n", value_caps.ReportID, value_caps.LinkCollection);
-    xinput_min_index = 3;
         controller->hid.haptics_report = value_caps.ReportID;
         controller->hid.haptics_rumble_caps = value_caps;
     }
