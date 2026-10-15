@@ -2084,10 +2084,11 @@ static RTL_USER_PROCESS_PARAMETERS *build_initial_params( void **module )
  */
 void init_startup_info(void)
 {
-    WCHAR *src, *dst, *env;
+    WCHAR *src, *dst, *env, *extra_args;
+    char *wine_args;
     void *module = NULL;
     unsigned int status;
-    SIZE_T size, info_size, env_size, env_pos;
+    SIZE_T size, info_size, env_size, env_pos, extra_args_len;
     RTL_USER_PROCESS_PARAMETERS *params = NULL;
     struct startup_info_data *info;
     UNICODE_STRING nt_name;

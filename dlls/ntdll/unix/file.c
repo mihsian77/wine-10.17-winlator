@@ -3751,7 +3751,7 @@ NTSTATUS create_reparse_target( int dirfd, const char *unix_src, int depth, cons
                 free( unix_path );
                 return STATUS_NO_MEMORY;
             }
-            status = wine_unix_to_nt_file_name( unix_path, nt_path, &nt_path_len );
+            status = unix_to_nt_file_name( unix_path, nt_path, &nt_path_len );
             if (status != STATUS_BUFFER_TOO_SMALL) break;
             free( nt_path );
         }
@@ -3766,7 +3766,7 @@ NTSTATUS create_reparse_target( int dirfd, const char *unix_src, int depth, cons
         {
             unix_path = malloc( unix_path_len );
             if (!unix_path) return STATUS_NO_MEMORY;
-            status = wine_nt_to_unix_file_name( &attr, unix_path, &unix_path_len, FILE_OPEN_IF );
+            status = nt_to_unix_file_name( &attr, unix_path, &unix_path_len, FILE_OPEN_IF );
             if (status != STATUS_BUFFER_TOO_SMALL) break;
             free( unix_path );
         }
@@ -3800,7 +3800,7 @@ NTSTATUS create_reparse_target( int dirfd, const char *unix_src, int depth, cons
             status = STATUS_NO_MEMORY;
             goto cleanup;
         }
-        status = wine_nt_to_unix_file_name( &attr, unix_target, &unix_target_len, FILE_OPEN_IF );
+        status = nt_to_unix_file_name( &attr, unix_target, &unix_target_len, FILE_OPEN_IF );
         if (status != STATUS_BUFFER_TOO_SMALL) break;
         free( unix_target );
     }

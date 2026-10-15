@@ -307,7 +307,6 @@ DECL_HANDLER(open_esync);
 DECL_HANDLER(get_esync_fd);
 DECL_HANDLER(esync_msgwait);
 DECL_HANDLER(set_keyboard_repeat);
-DECL_HANDLER(get_esync_apc_fd);
 DECL_HANDLER(get_inproc_sync_fd);
 DECL_HANDLER(get_inproc_alert_fd);
 DECL_HANDLER(d3dkmt_object_create);
@@ -316,6 +315,7 @@ DECL_HANDLER(d3dkmt_object_query);
 DECL_HANDLER(d3dkmt_object_open);
 DECL_HANDLER(d3dkmt_share_objects);
 DECL_HANDLER(d3dkmt_object_open_name);
+DECL_HANDLER(get_esync_apc_fd);
 
 typedef void (*req_handler)( const void *req, void *reply );
 static const req_handler req_handlers[REQ_NB_REQUESTS] =
@@ -620,7 +620,6 @@ static const req_handler req_handlers[REQ_NB_REQUESTS] =
     (req_handler)req_get_esync_fd,
     (req_handler)req_esync_msgwait,
     (req_handler)req_set_keyboard_repeat,
-    (req_handler)req_get_esync_apc_fd,
     (req_handler)req_get_inproc_sync_fd,
     (req_handler)req_get_inproc_alert_fd,
     (req_handler)req_d3dkmt_object_create,
@@ -629,6 +628,7 @@ static const req_handler req_handlers[REQ_NB_REQUESTS] =
     (req_handler)req_d3dkmt_object_open,
     (req_handler)req_d3dkmt_share_objects,
     (req_handler)req_d3dkmt_object_open_name,
+    (req_handler)req_get_esync_apc_fd,
 };
 
 C_ASSERT( sizeof(abstime_t) == 8 );
@@ -2336,7 +2336,6 @@ C_ASSERT( offsetof(struct set_keyboard_repeat_request, period) == 20 );
 C_ASSERT( sizeof(struct set_keyboard_repeat_request) == 24 );
 C_ASSERT( offsetof(struct set_keyboard_repeat_reply, enable) == 8 );
 C_ASSERT( sizeof(struct set_keyboard_repeat_reply) == 16 );
-C_ASSERT( sizeof(struct get_esync_apc_fd_request) == 16 );
 C_ASSERT( offsetof(struct get_inproc_sync_fd_request, handle) == 12 );
 C_ASSERT( sizeof(struct get_inproc_sync_fd_request) == 16 );
 C_ASSERT( offsetof(struct get_inproc_sync_fd_reply, type) == 8 );
@@ -2382,3 +2381,4 @@ C_ASSERT( offsetof(struct d3dkmt_object_open_name_request, rootdir) == 24 );
 C_ASSERT( sizeof(struct d3dkmt_object_open_name_request) == 32 );
 C_ASSERT( offsetof(struct d3dkmt_object_open_name_reply, handle) == 8 );
 C_ASSERT( sizeof(struct d3dkmt_object_open_name_reply) == 16 );
+C_ASSERT( sizeof(struct get_esync_apc_fd_request) == 16 );

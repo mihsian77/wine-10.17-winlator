@@ -3824,7 +3824,6 @@ static const dump_func req_dumpers[REQ_NB_REQUESTS] =
     (dump_func)dump_get_esync_fd_request,
     (dump_func)dump_esync_msgwait_request,
     (dump_func)dump_set_keyboard_repeat_request,
-    (dump_func)dump_get_esync_apc_fd_request,
     (dump_func)dump_get_inproc_sync_fd_request,
     (dump_func)dump_get_inproc_alert_fd_request,
     (dump_func)dump_d3dkmt_object_create_request,
@@ -3833,6 +3832,7 @@ static const dump_func req_dumpers[REQ_NB_REQUESTS] =
     (dump_func)dump_d3dkmt_object_open_request,
     (dump_func)dump_d3dkmt_share_objects_request,
     (dump_func)dump_d3dkmt_object_open_name_request,
+    (dump_func)dump_get_esync_apc_fd_request,
 };
 
 static const dump_func reply_dumpers[REQ_NB_REQUESTS] =
@@ -4137,7 +4137,6 @@ static const dump_func reply_dumpers[REQ_NB_REQUESTS] =
     (dump_func)dump_get_esync_fd_reply,
     NULL,
     (dump_func)dump_set_keyboard_repeat_reply,
-    NULL,
     (dump_func)dump_get_inproc_sync_fd_reply,
     (dump_func)dump_get_inproc_alert_fd_reply,
     (dump_func)dump_d3dkmt_object_create_reply,
@@ -4146,6 +4145,7 @@ static const dump_func reply_dumpers[REQ_NB_REQUESTS] =
     (dump_func)dump_d3dkmt_object_open_reply,
     (dump_func)dump_d3dkmt_share_objects_reply,
     (dump_func)dump_d3dkmt_object_open_name_reply,
+    NULL,
 };
 
 static const char * const req_names[REQ_NB_REQUESTS] =
@@ -4450,7 +4450,6 @@ static const char * const req_names[REQ_NB_REQUESTS] =
     "get_esync_fd",
     "esync_msgwait",
     "set_keyboard_repeat",
-    "get_esync_apc_fd",
     "get_inproc_sync_fd",
     "get_inproc_alert_fd",
     "d3dkmt_object_create",
@@ -4459,6 +4458,7 @@ static const char * const req_names[REQ_NB_REQUESTS] =
     "d3dkmt_object_open",
     "d3dkmt_share_objects",
     "d3dkmt_object_open_name",
+    "get_esync_apc_fd",
 };
 
 static const struct
